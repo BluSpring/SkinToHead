@@ -11,6 +11,12 @@ let cache = require('./username_cache.json');
 if (!fs.existsSync('./names.txt'))
     fs.writeFileSync('./names.txt', '');
 
+if (!fs.existsSync('./skins'))
+    fs.mkdirSync('./skins');
+
+if (!fs.existsSync('./heads'))
+    fs.mkdirSync('./heads');
+
 const usernames = fs.readFileSync('./names.txt').toString();
 
 // Flags
