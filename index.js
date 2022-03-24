@@ -3,7 +3,13 @@ const axios = require('axios').default;
 const pngjs = require('pngjs');
 const init = require('3d-core-raub');
 
+if (!fs.existsSync('./username_cache.json'))
+    fs.writeFileSync('./username_cache.json', '{}');
+
 let cache = require('./username_cache.json');
+
+if (!fs.existsSync('./names.txt'))
+    fs.writeFileSync('./names.txt', '');
 
 const usernames = fs.readFileSync('./names.txt').toString();
 
