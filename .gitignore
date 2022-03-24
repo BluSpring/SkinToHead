@@ -1,0 +1,7 @@
+node_modules
+heads
+oldheads
+skins
+*.txt
+username_cache.json
+*.png
