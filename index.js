@@ -26,10 +26,11 @@ const noUpscaling = !process.argv.includes('--upscale');
 const noSmall = process.argv.includes('--no-small');
 const makeAtlas = process.argv.includes('--atlas');
 const upscaledAtlas = makeAtlas && (!noUpscaling || process.argv.includes('--upscaled-atlas') || process.argv.includes('--upscale-atlas'));
+const addNames = process.argv.includes('--named');
 
 if (noSmall && noUpscaling) {
     console.log(`Bro what the fuck are you doing`);
-    return;
+    process.exit(1);
 }
 
 let MAX_TEXTURE_SIZE = 8192;
@@ -46,7 +47,7 @@ if (makeAtlas) {
 }
 
 function getSteveOrAlex(uuid) {
-    if (uuid.length <= 16) {
+    if (!uuid || uuid.length <= 16) {
         // we can't get the skin type by username
         return "steve";
     } else {
@@ -86,14 +87,14 @@ function getSteveOrAlex(uuid) {
             }
         }
 
-        if (fs.existsSync(`./skins/${uuid}.png`) && !shouldOverwrite) {
+        if ((fs.existsSync(`./skins/${uuid}.png`) || fs.existsSync(`./skins/${name}_${uuid}.png`)) && !shouldOverwrite) {
             console.log(`[] Found that we already have ${name}'s skin downloaded, skipping download step.`);
         }
 
         /**
          * @type {Buffer}
          */
-        let skinData = fs.existsSync(`./skins/${uuid}.png`) && !shouldOverwrite ? fs.readFileSync(`./skins/${uuid}.png`) : null;
+        let skinData = fs.existsSync(`./skins/${uuid}.png`) && !shouldOverwrite ? fs.readFileSync(`./skins/${uuid}.png`) : fs.existsSync(`./skins/${name}_${uuid}.png`) ? fs.readFileSync(`./skins/${name}_${uuid}.png`) : null;
 
         let writeStream = null;
 
@@ -102,7 +103,7 @@ function getSteveOrAlex(uuid) {
                 const skin = (await axios.get(`https://sessionserver.mojang.com/session/minecraft/profile/${uuid}`)).data;
 
                 const base64 = skin.properties[0].value;
-                writeStream = fs.createWriteStream(`./skins/${uuid}.png`);
+                writeStream = fs.createWriteStream(`./skins/${addNames ? `${name}_` : ''}${uuid}.png`);
                 
                 (await axios.get(JSON.parse(Buffer.from(base64, 'base64').toString()).textures.SKIN.url, { responseType: 'stream' }))
                     .data
@@ -118,7 +119,7 @@ function getSteveOrAlex(uuid) {
             const head = new pngjs.PNG({ width: 8, height: 8 });
             const upscaledHead = new pngjs.PNG({ width: 256, height: 256 });
 
-            fs.createReadStream(`./skins/${uuid}.png`)
+            fs.createReadStream(`./skins/${fs.existsSync(`./skins/${name}_${uuid}.png`) ? `${name}_` : ''}${uuid}.png`)
                 .pipe(new pngjs.PNG())
                 .on('parsed', function () {
                     // The first layer should not have alpha.

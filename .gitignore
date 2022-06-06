@@ -1,7 +1,9 @@
 node_modules
 heads
-oldheads
+old*
 skins
 *.txt
 username_cache.json
 *.png
+docs/
+*.yml
