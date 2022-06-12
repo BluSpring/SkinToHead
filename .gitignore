@@ -7,3 +7,4 @@ username_cache.json
 *.png
 docs/
 *.yml
+arm_types.json
