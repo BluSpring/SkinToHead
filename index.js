@@ -27,6 +27,7 @@ const noSmall = process.argv.includes('--no-small');
 const makeAtlas = process.argv.includes('--atlas');
 const upscaledAtlas = makeAtlas && (!noUpscaling || process.argv.includes('--upscaled-atlas') || process.argv.includes('--upscale-atlas'));
 const addNames = process.argv.includes('--named');
+const addArmType = process.argv.includes('--write-slim');
 
 if (noSmall && noUpscaling) {
     console.log(`Bro what the fuck are you doing`);
@@ -64,6 +65,8 @@ function getSteveOrAlex(uuid) {
         return lsbs_even ? "alex" : "steve";
     }
 }
+
+let armType = {};
 
 (async () => {
     for (const name of usernames.split(/\n|\r\n/g)) {
@@ -105,9 +108,14 @@ function getSteveOrAlex(uuid) {
                 const base64 = skin.properties[0].value;
                 writeStream = fs.createWriteStream(`./skins/${addNames ? `${name}_` : ''}${uuid}.png`);
                 
-                (await axios.get(JSON.parse(Buffer.from(base64, 'base64').toString()).textures.SKIN.url, { responseType: 'stream' }))
+                const parsed = JSON.parse(Buffer.from(base64, 'base64').toString());
+                
+                (await axios.get(parsed.textures.SKIN.url, { responseType: 'stream' }))
                     .data
                     .pipe(writeStream);
+
+                if (addArmType)
+                    armType[name] = parsed.textures.SKIN && parsed.textures.SKIN.metadata && parsed.textures.SKIN.metadata.mode && parsed.textures.SKIN.metadata.mode === 'slim' ? 'slim' : 'default';
             } catch (e) {
                 console.error(`\n!!!! ERROR !!!! -- Failed to get ${name}'s skin from Mojang's servers! However, we can determine that ${name} is a ${getSteveOrAlex(uuid)} skin.\n${e.message}\n`);
                 continue;
@@ -201,6 +209,9 @@ function getSteveOrAlex(uuid) {
         else
             makeHead();
     };
+
+    if (addArmType)
+        fs.writeFileSync('./arm_types.json', JSON.stringify(armType, null, 4));
 
     fs.writeFileSync('./username_cache.json', JSON.stringify(cache));
 
