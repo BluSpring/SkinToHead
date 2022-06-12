@@ -115,7 +115,7 @@ let armType = {};
                     .pipe(writeStream);
 
                 if (addArmType)
-                    armType[name] = parsed.textures.SKIN && parsed.textures.SKIN.metadata && parsed.textures.SKIN.metadata.mode && parsed.textures.SKIN.metadata.mode === 'slim' ? 'slim' : 'default';
+                    armType[name] = parsed.textures.SKIN && parsed.textures.SKIN.metadata && parsed.textures.SKIN.metadata.model && parsed.textures.SKIN.metadata.model == 'slim' ? 'slim' : 'default';
             } catch (e) {
                 console.error(`\n!!!! ERROR !!!! -- Failed to get ${name}'s skin from Mojang's servers! However, we can determine that ${name} is a ${getSteveOrAlex(uuid)} skin.\n${e.message}\n`);
                 continue;
